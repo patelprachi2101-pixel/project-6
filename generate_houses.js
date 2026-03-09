@@ -1,10 +1,13 @@
-<!DOCTYPE html>
+const fs = require('fs');
+const path = require('path');
+
+const baseHtml = `<!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Surat Apartments - Tenant Portal</title>
+    <title>{{CITY_CAP}} Houses - Tenant Portal</title>
     <link rel="stylesheet" href="../tenant-styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
@@ -37,8 +40,8 @@
         <!-- Search & Filter Section -->
         <section class="search-section">
             <div class="search-header">
-                <h1>Apartments in Surat</h1>
-                <p>Discover perfectly suited apartments in your selected area.</p>
+                <h1>Houses in {{CITY_CAP}}</h1>
+                <p>Discover comfortable and independent houses in your selected area.</p>
             </div>
 
             <div class="filter-bar">
@@ -46,13 +49,13 @@
                     <label for="location">Location</label>
                     <select id="location" class="filter-select">
                         <option value="">Any Location</option>
-                        <option value="ahmedabad">Ahmedabad</option>
-                        <option value="gandhinagar">Gandhinagar</option>
-                        <option value="surat" selected>Surat</option>
-                        <option value="rajkot">Rajkot</option>
-                        <option value="jamnagar">Jamnagar</option>
-                        <option value="bhavnagar">Bhavnagar</option>
-                        <option value="mehsana">Mehsana</option>
+                        <option value="ahmedabad" {{ahmedabad_selected}}>Ahmedabad</option>
+                        <option value="gandhinagar" {{gandhinagar_selected}}>Gandhinagar</option>
+                        <option value="surat" {{surat_selected}}>Surat</option>
+                        <option value="rajkot" {{rajkot_selected}}>Rajkot</option>
+                        <option value="jamnagar" {{jamnagar_selected}}>Jamnagar</option>
+                        <option value="bhavnagar" {{bhavnagar_selected}}>Bhavnagar</option>
+                        <option value="mehsana" {{mehsana_selected}}>Mehsana</option>
                     </select>
                 </div>
 
@@ -62,8 +65,8 @@
                     <label for="property-type">Property Type</label>
                     <select id="property-type" class="filter-select">
                         <option value="">Any Type</option>
-                        <option value="apartment" selected>Apartment</option>
-                        <option value="house">House</option>
+                        <option value="apartment">Apartment</option>
+                        <option value="house" selected>House</option>
                         <option value="pg">PG</option>
                         <option value="villa">Villa</option>
                     </select>
@@ -108,185 +111,101 @@
 
         <!-- Properties Grid Section -->
         <section class="properties-section">
-            <h2 class="section-title">Surat Apartments</h2>
+            <h2 class="section-title">{{CITY_CAP}} Houses</h2>
             <div class="properties-grid">
-
-                <!-- Property 1 -->
-                <div class="property-card" data-owner-name="Arjun Mehta"
-                    data-owner-avatar="https://i.pravatar.cc/150?u=12">
+                
+                <!-- House 1 -->
+                <div class="property-card" data-owner-name="Arjun Mehta" data-owner-avatar="https://i.pravatar.cc/150?u=12">
                     <div class="property-image"
-                        style="background-image: url('https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80');">
+                        style="background-image: url('https://images.unsplash.com/photo-1512917774080-9991f1c4c750?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80');">
                         <span class="badge">Featured</span>
                     </div>
                     <div class="property-details">
-                        <div class="price">₹15,000<span>/mo</span></div>
-                        <h3>Cozy Navrangpura Apartment</h3>
-                        <p class="location">Navrangpura, Surat</p>
+                        <div class="price">₹45,000<span>/mo</span></div>
+                        <h3>Cozy Family House</h3>
+                        <p class="location">Maple Drive, {{CITY_CAP}}</p>
                         <div class="amenities">
-                            <span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                                </svg> 1 BHK</span>
-                            <span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M21 21H3V3h18v18z"></path>
-                                    <path d="M8 8h8v8H8z"></path>
-                                </svg> 1 Baths</span>
-                            <span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2">
-                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                                </svg> 800 sqft</span>
+                            <span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg> 3 BHK</span>
+                            <span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg> 2200 sqft</span>
+                            <span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect><polyline points="17 2 12 7 7 2"></polyline></svg> Garage</span>
                         </div>
                         <button class="btn-outline">View Contact</button>
                     </div>
                 </div>
 
-                <!-- Property 2 -->
-                <div class="property-card" data-owner-name="Rakesh Joshi"
-                    data-owner-avatar="https://i.pravatar.cc/150?u=13">
+                <!-- House 2 -->
+                <div class="property-card" data-owner-name="Rakesh Joshi" data-owner-avatar="https://i.pravatar.cc/150?u=13">
                     <div class="property-image"
-                        style="background-image: url('https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80');">
+                        style="background-image: url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80');">
                     </div>
                     <div class="property-details">
                         <div class="price">₹35,000<span>/mo</span></div>
-                        <h3>Luxury Vastrapur Flat</h3>
-                        <p class="location">Vastrapur, Surat</p>
+                        <h3>Suburban Comfort House</h3>
+                        <p class="location">Westend, {{CITY_CAP}}</p>
                         <div class="amenities">
-                            <span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                                </svg> 3 BHK</span>
-                            <span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M21 21H3V3h18v18z"></path>
-                                    <path d="M8 8h8v8H8z"></path>
-                                </svg> 3 Baths</span>
-                            <span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2">
-                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                                </svg> 1800 sqft</span>
+                            <span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg> 2 BHK</span>
+                            <span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg> 1800 sqft</span>
+                            <span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg> Backyard</span>
                         </div>
                         <button class="btn-outline">View Contact</button>
                     </div>
                 </div>
 
-                <!-- Property 3 -->
-                <div class="property-card" data-owner-name="Sunil Dutt"
-                    data-owner-avatar="https://i.pravatar.cc/150?u=14">
+                <!-- House 3 -->
+                <div class="property-card" data-owner-name="Sunil Dutt" data-owner-avatar="https://i.pravatar.cc/150?u=14">
                     <div class="property-image"
-                        style="background-image: url('https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80');">
+                        style="background-image: url('https://images.unsplash.com/photo-1613490908653-b95dafebfc21?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80');">
                         <span class="badge">New</span>
                     </div>
                     <div class="property-details">
-                        <div class="price">₹22,000<span>/mo</span></div>
-                        <h3>Prahlad Nagar Residency</h3>
-                        <p class="location">Prahlad Nagar, Surat</p>
+                        <div class="price">₹55,000<span>/mo</span></div>
+                        <h3>Modern Independent House</h3>
+                        <p class="location">Downtown Lane, {{CITY_CAP}}</p>
                         <div class="amenities">
-                            <span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                                </svg> 2 BHK</span>
-                            <span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M21 21H3V3h18v18z"></path>
-                                    <path d="M8 8h8v8H8z"></path>
-                                </svg> 2 Baths</span>
-                            <span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2">
-                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                                </svg> 1200 sqft</span>
+                            <span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg> 4 BHK</span>
+                            <span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg> 3000 sqft</span>
+                            <span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect><polyline points="17 2 12 7 7 2"></polyline></svg> 2 Car Parking</span>
                         </div>
                         <button class="btn-outline">View Contact</button>
                     </div>
                 </div>
 
-                <!-- Property 4 -->
-                <div class="property-card" data-owner-name="Kiran Patel"
-                    data-owner-avatar="https://i.pravatar.cc/150?u=15">
+                 <!-- House 4 -->
+                <div class="property-card" data-owner-name="Neha Patel" data-owner-avatar="https://i.pravatar.cc/150?u=15">
                     <div class="property-image"
-                        style="background-image: url('https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80');">
+                        style="background-image: url('https://images.unsplash.com/photo-1580587771525-78b9dba3b914?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80');">
                     </div>
                     <div class="property-details">
-                        <div class="price">₹28,000<span>/mo</span></div>
-                        <h3>SG Highway Prime</h3>
-                        <p class="location">SG Highway, Surat</p>
+                        <div class="price">₹48,000<span>/mo</span></div>
+                        <h3>Classic Brick House</h3>
+                        <p class="location">Old City, {{CITY_CAP}}</p>
                         <div class="amenities">
-                            <span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                                </svg> 3 BHK</span>
-                            <span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M21 21H3V3h18v18z"></path>
-                                    <path d="M8 8h8v8H8z"></path>
-                                </svg> 2 Baths</span>
-                            <span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2">
-                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                                </svg> 1450 sqft</span>
+                            <span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg> 3 BHK</span>
+                            <span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg> 2400 sqft</span>
+                            <span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg> Garden</span>
                         </div>
                         <button class="btn-outline">View Contact</button>
                     </div>
                 </div>
-
-                <!-- Property 5 -->
-                <div class="property-card" data-owner-name="Manoj Shah"
-                    data-owner-avatar="https://i.pravatar.cc/150?u=16">
+                
+                 <!-- House 5 -->
+                <div class="property-card" data-owner-name="Kabir Singh" data-owner-avatar="https://i.pravatar.cc/150?u=11">
                     <div class="property-image"
                         style="background-image: url('https://images.unsplash.com/photo-1564013799919-ab600027ffc6?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80');">
                     </div>
                     <div class="property-details">
-                        <div class="price">₹19,500<span>/mo</span></div>
-                        <h3>Satellite Comforts</h3>
-                        <p class="location">Satellite, Surat</p>
+                        <div class="price">₹32,000<span>/mo</span></div>
+                        <h3>Minimalist Open House</h3>
+                        <p class="location">Prajapati Avenue, {{CITY_CAP}}</p>
                         <div class="amenities">
-                            <span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                                </svg> 2 BHK</span>
-                            <span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M21 21H3V3h18v18z"></path>
-                                    <path d="M8 8h8v8H8z"></path>
-                                </svg> 2 Baths</span>
-                            <span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2">
-                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                                </svg> 1150 sqft</span>
+                            <span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg> 2 BHK</span>
+                            <span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg> 1600 sqft</span>
+                            <span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg> Rooftop</span>
                         </div>
                         <button class="btn-outline">View Contact</button>
                     </div>
                 </div>
-
-                <!-- Property 6 -->
-                <div class="property-card" data-owner-name="Kavita Kulkarni"
-                    data-owner-avatar="https://i.pravatar.cc/150?u=17">
-                    <div class="property-image"
-                        style="background-image: url('https://images.unsplash.com/photo-1502005229762-cf1b2da7c5d6?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80');">
-                    </div>
-                    <div class="property-details">
-                        <div class="price">₹17,000<span>/mo</span></div>
-                        <h3>Bopal Greens</h3>
-                        <p class="location">Bopal, Surat</p>
-                        <div class="amenities">
-                            <span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                                </svg> 2 BHK</span>
-                            <span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M21 21H3V3h18v18z"></path>
-                                    <path d="M8 8h8v8H8z"></path>
-                                </svg> 2 Baths</span>
-                            <span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2">
-                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                                </svg> 1000 sqft</span>
-                        </div>
-                        <button class="btn-outline">View Contact</button>
-                    </div>
-                </div>
-
+                
             </div>
         </section>
     </main>
@@ -297,40 +216,24 @@
             <button class="modal-close" id="prop-close" aria-label="Close modal">&times;</button>
             <div class="modal-body">
                 <div class="property-images-gallery">
-                    <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
-                        alt="Main Property" class="main-gallery-img" id="modal-main-img">
+                    <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Main Property" class="main-gallery-img" id="modal-main-img">
                     <div class="gallery-thumbnails">
-                        <img src="https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80"
-                            alt="Thumbnail 1">
-                        <img src="https://images.unsplash.com/photo-1484154218962-a197022b5858?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80"
-                            alt="Thumbnail 2">
-                        <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80"
-                            alt="Thumbnail 3">
+                        <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80" alt="Thumbnail 1">
+                        <img src="https://images.unsplash.com/photo-1613490908653-b95dafebfc21?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80" alt="Thumbnail 2">
+                        <img src="https://images.unsplash.com/photo-1580587771525-78b9dba3b914?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80" alt="Thumbnail 3">
                     </div>
                 </div>
                 <div class="property-modal-details">
                     <h2 class="modal-title" id="modal-title">Property Title</h2>
                     <p class="modal-location" id="modal-loc">Property Location</p>
                     <div class="modal-amenities">
-                        <span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                            </svg> 2 BHK</span>
-                        <span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M21 21H3V3h18v18z"></path>
-                                <path d="M8 8h8v8H8z"></path>
-                            </svg> 2 Baths</span>
-                        <span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2">
-                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                            </svg> 1250 sqft</span>
+                        <span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg> 3 BHK</span>
+                        <span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg> 2200 sqft</span>
+                        <span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect><polyline points="17 2 12 7 7 2"></polyline></svg> Garage</span>
                     </div>
                     <div class="modal-description">
                         <h3>About this property</h3>
-                        <p>This beautiful and spacious apartment is located in the heart of the city with great access
-                            to transport, malls, and restaurants. Perfect for a family or working professionals looking
-                            for comfort and convenience.</p>
+                        <p>A beautiful independent house with ample space, a dedicated parking garage, and a welcoming neighborhood. Experience the true comfort of a private home without the hassle of a shared apartment building.</p>
                     </div>
                     <div class="owner-section">
                         <div class="owner-info">
@@ -344,25 +247,14 @@
                         </div>
                         <div class="owner-actions">
                             <button class="action-icon call-icon" aria-label="Call Owner">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                    stroke-linejoin="round">
-                                    <path
-                                        d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z">
-                                    </path>
-                                </svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
                             </button>
                             <button class="action-icon message-icon auth-trigger" aria-label="Message Owner">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                    stroke-linejoin="round">
-                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                                </svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
                             </button>
                         </div>
                     </div>
-                    <button class="btn-solid btn-book auth-trigger"
-                        style="width: 100%; margin-top: 1.5rem; padding: 0.8rem; font-size: 1.1rem;">Book Now</button>
+                    <button class="btn-solid btn-book auth-trigger" style="width: 100%; margin-top: 1.5rem; padding: 0.8rem; font-size: 1.1rem;">Book Now</button>
                 </div>
             </div>
         </div>
@@ -481,5 +373,69 @@
 
     <script src="../tenant-script.js"></script>
 </body>
+</html>`;
 
-</html>
+const cities = ['ahmedabad', 'surat', 'jamnagar', 'mehsana', 'gandhinagar', 'rajkot', 'bhavnagar'];
+
+cities.forEach(city => {
+    const CityName = city.charAt(0).toUpperCase() + city.slice(1);
+
+    let content = baseHtml.replace(/\{\{CITY_CAP\}\}/g, CityName);
+
+    // Set selected city
+    content = content.replace(/\{\{[a-z]+_selected\}\}/g, (match) => {
+        if (match === `{{${city}_selected}}`) return 'selected';
+        return '';
+    });
+
+    const dir = path.join(__dirname, city);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir);
+    fs.writeFileSync(path.join(dir, 'house.html'), content);
+    console.log(`Created ${city}/house.html`);
+});
+
+// Update the script
+const scriptPath = path.join(__dirname, 'tenant-script.js');
+let scriptContent = fs.readFileSync(scriptPath, 'utf8');
+
+const searchBtnCode = `    // Handle search redirection
+    const searchBtn = document.querySelector('.btn-search');
+    if (searchBtn) {
+        searchBtn.addEventListener('click', () => {
+            const loc = document.getElementById('location')?.value;
+            const type = document.getElementById('property-type')?.value;
+
+            if (loc && (type === 'apartment' || type === 'pg' || type === 'villa' || type === 'house')) {
+                const cities = ['ahmedabad', 'surat', 'jamnagar', 'mehsana', 'gandhinagar', 'rajkot', 'bhavnagar'];
+                if (cities.includes(loc)) {
+                    const currentPath = window.location.pathname;
+                    let targetFile = 'apartments.html';
+                    if (type === 'pg') targetFile = 'pg.html';
+                    if (type === 'villa') targetFile = 'villa.html';
+                    if (type === 'house') targetFile = 'house.html';
+                    
+                    if (cities.some(c => currentPath.includes('/' + c + '/'))) {
+                         if (currentPath.includes('/' + loc + '/')) {
+                             window.location.href = targetFile;
+                         } else {
+                             window.location.href = '../' + loc + '/' + targetFile;
+                         }
+                    } else {
+                         window.location.href = loc + '/' + targetFile;
+                    }
+                } else {
+                    alert('Location missing. Select a valid city.');
+                }
+            } else {
+                alert('No properties found for this specific filter in this demo. Try Apartment, House, PG, or Villa.');
+            }
+        });
+    }
+
+});`;
+
+const scriptParts = scriptContent.split('// Handle search redirection');
+if (scriptParts.length > 1) {
+    fs.writeFileSync(scriptPath, scriptParts[0] + searchBtnCode);
+    console.log('Updated tenant-script.js for House support');
+}
