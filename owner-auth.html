@@ -428,6 +428,10 @@
             if (storedProfileStr) {
                 const storedProfile = JSON.parse(storedProfileStr);
                 if (storedProfile.email === email && storedProfile.password === password) {
+                    if (storedProfile.isBlocked) {
+                        alert('Your account has been blocked by the administrator. Contact support for more information.');
+                        return;
+                    }
                     localStorage.setItem('ownerEmail', email);
                     localStorage.setItem('ownerLoggedIn', 'true');
                     window.location.href = 'owner-dashboard.html';

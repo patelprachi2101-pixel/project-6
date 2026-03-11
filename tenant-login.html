@@ -229,6 +229,13 @@
             e.preventDefault();
             const email = document.getElementById('email').value;
 
+            // Check if blocked
+            const profileData = JSON.parse(localStorage.getItem('tenantProfile') || '{}');
+            if (profileData.isBlocked) {
+                alert('Your account has been blocked by the administrator. Contact support for more information.');
+                return;
+            }
+
             // Set basic login info
             localStorage.setItem('tenantEmail', email);
             localStorage.setItem('tenantLoggedIn', 'true');
