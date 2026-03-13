@@ -673,15 +673,18 @@ function switchSection(secId, navElement) {
 
                     // Push confirmed message to tenant chat
                     let tenantChats = JSON.parse(localStorage.getItem('tenantChats') || '[]');
-                    if (tenantChats.length === 0) {
-                        tenantChats.push({
+                    let sysChat = tenantChats.find(c => c.id === 'sysAdmin');
+                    if (!sysChat) {
+                        sysChat = {
                             id: "sysAdmin",
-                            name: "System Notifications",
-                            avatar: "https://images.unsplash.com/photo-1542626991-cbc4e32524cc?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
+                            name: "Property Owner (via Admin)",
+                            avatar: "https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
                             messages: []
-                        });
+                        };
+                        tenantChats.push(sysChat);
                     }
-                    tenantChats[0].messages.push({
+                    
+                    sysChat.messages.push({
                         text: `Your booking request #${booking.id} for ${booking.prop} has been Confirmed by the administrator!`,
                         sender: "owner",
                         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })

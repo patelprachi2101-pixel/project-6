@@ -254,6 +254,19 @@
         </div>
     </div>
 
+    <!-- View ID Proof Modal -->
+    <div id="view-idproof-modal"
+        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1010; align-items: center; justify-content: center;">
+        <div
+            style="background: var(--surface-color); padding: 2rem; border-radius: 12px; width: 90%; max-width: 450px; border: 1px solid rgba(255,255,255,0.1); position: relative; text-align: center;">
+            <button onclick="document.getElementById('view-idproof-modal').style.display='none'"
+                style="position: absolute; top: 1rem; right: 1.5rem; background: transparent; border: none; color: white; font-size: 1.5rem; cursor: pointer;">&times;</button>
+            <h3 style="margin-top: 0; margin-bottom: 1.5rem; font-size: 1.15rem; color: var(--text-light);">Tenant ID Proof Document</h3>
+            <img id="view-idproof-img" src="" alt="ID Proof"
+                style="width: 100%; max-height: 300px; object-fit: contain; border-radius: 8px; border: 1px dashed rgba(255,255,255,0.2);">
+        </div>
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const ownerName = localStorage.getItem('ownerName') || 'Vikas Patel';
@@ -287,23 +300,46 @@
                     const div = document.createElement('div');
                     div.className = 'tenant-card';
                     div.innerHTML = `
-                        <img src="\${avatarStr}" alt="Tenant" class="tenant-avatar">
-                        <div class="tenant-info" style="flex: 1;">
-                            <h4>\${nameStr}</h4>
-                            <div style="margin-bottom: 0.5rem;"><span style="background: rgba(46, 204, 113, 0.2); color: #2ecc71; padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.75rem; font-weight: 500;">Booking Request</span></div>
-                            <p style="margin: 0; color: var(--text-muted); font-size: 0.95rem;">Interested in: <strong style="color: var(--text-light);">\${b.propertyTitle}</strong></p>
-                            
-                            <div class="tenant-details">
-                                <div><span class="label">Email</span> <span>\${t.email || '-'}</span></div>
-                                <div><span class="label">Phone</span> <span>\${t.phone || '-'}</span></div>
-                                <div><span class="label">Occupation</span> <span>\${t.occupation || '-'}</span></div>
-                                <div><span class="label">Move-in timeframe</span> <span>Within 30 Days</span></div>
+                        <div style="display: flex; flex-direction: column; gap: 1rem; flex: 1;">
+                            <div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
+                                <!-- Tenant Info -->
+                                <div style="flex: 1; min-width: 250px;">
+                                    <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 1rem;">
+                                        <img src="${avatarStr}" alt="Tenant" class="tenant-avatar" style="width: 60px; height: 60px; border-radius: 50%;">
+                                        <div>
+                                            <h4 style="margin: 0; font-size: 1.2rem;">${nameStr}</h4>
+                                            <span style="background: rgba(46, 204, 113, 0.2); color: #2ecc71; padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.75rem; font-weight: 500;">Booking Request</span>
+                                        </div>
+                                    </div>
+                                    <div class="tenant-details" style="margin-top: 0;">
+                                        <div><span class="label">Email</span> <span>${t.email || '-'}</span></div>
+                                        <div><span class="label">Phone</span> <span>${t.phone || '-'}</span></div>
+                                        <div><span class="label">Occupation</span> <span>${t.occupation || '-'}</span></div>
+                                        <div><span class="label">Timeframe</span> <span>Immediate</span></div>
+                                    </div>
+                                    <button onclick="viewTenantIdProof('${t.idProof || 'https://images.unsplash.com/photo-1628155930542-3c7a64e2c833?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80'}')" style="margin-top: 1rem; padding: 0.4rem 0.8rem; background: transparent; border: 1px solid rgba(255,255,255,0.2); color: var(--text-light); border-radius: 4px; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem; transition: background 0.2s;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                                        View ID Proof
+                                    </button>
+                                </div>
+                                
+                                <!-- Property Info -->
+                                <div style="flex: 1; min-width: 250px; background: rgba(0,0,0,0.15); padding: 1rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+                                    <span style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px;">Interested In Property</span>
+                                    <div style="display: flex; gap: 1rem;">
+                                        <img src="${b.propertyImage || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80'}" alt="Property" style="width: 80px; height: 80px; object-fit: cover; border-radius: 6px;">
+                                        <div>
+                                            <h5 style="margin: 0 0 0.4rem 0; font-size: 1.05rem; color: var(--text-light);">${b.propertyTitle || 'Property Info'}</h5>
+                                            <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted);">${b.propertyLoc || 'Location not specified'}</p>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                             
-                            <div style="margin-top: 1.5rem; display: flex; gap: 1rem; flex-wrap: wrap;">
-                                <button onclick="approveBooking(\${index})" style="padding: 0.6rem 1.2rem; background: var(--primary-color); border: none; color: white; border-radius: 6px; cursor: pointer;">Approve Booking</button>
-                                <a href="owner-chat.html" style="padding: 0.6rem 1.2rem; background: transparent; border: 1px solid rgba(255,255,255,0.2); color: var(--text-light); text-decoration: none; border-radius: 6px; text-align: center;">Message Tenant</a>
-                                <button onclick="viewBookedProperty(\${index})" style="padding: 0.6rem 1.2rem; background: transparent; border: 1px solid rgba(52, 152, 219, 0.4); color: #3498db; border-radius: 6px; cursor: pointer;">View Property</button>
+                            <!-- Action Buttons -->
+                            <div style="margin-top: 0.5rem; display: flex; gap: 1rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 1.5rem;">
+                                <button onclick="approveBooking(${index})" style="flex: 1; padding: 0.8rem; background: #2ecc71; border: none; color: white; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.95rem; transition: background 0.2s;">Confirm Booking</button>
+                                <button onclick="rejectBooking(${index})" style="flex: 1; padding: 0.8rem; background: transparent; border: 1px solid #e74c3c; color: #e74c3c; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;">Reject Booking</button>
                             </div>
                         </div>
                     `;
@@ -320,6 +356,12 @@
                     document.getElementById('view-prop-img').src = b.propertyImage || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80';
                     document.getElementById('view-property-modal').style.display = 'flex';
                 }
+            };
+
+            // Expose a global function to view Tenant ID Proof
+            window.viewTenantIdProof = function (imgUrl) {
+                document.getElementById('view-idproof-img').src = imgUrl;
+                document.getElementById('view-idproof-modal').style.display = 'flex';
             };
 
             // Global function to approve a booking
@@ -340,15 +382,63 @@
                     tenantNotifs.push({
                         id: Date.now(),
                         title: "Owner Approved Booking",
-                        body: `The property owner has approved your booking for \${b.propertyTitle}!`,
+                        body: `The property owner has approved your booking for ${b.propertyTitle}!`,
                         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
                         read: false
                     });
                     localStorage.setItem('tenantNotifications', JSON.stringify(tenantNotifs));
 
+                    // Push automated chat message to tenant
+                    let tenantChats = JSON.parse(localStorage.getItem('tenantChats') || '[]');
+                    const ownerId = ownerName.replace(/\s+/g, '-').toLowerCase();
+                    const ownerAvatar = 'https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80';
+                    
+                    let chat = tenantChats.find(c => c.id === ownerId);
+                    if (!chat) {
+                        chat = { id: ownerId, name: ownerName, avatar: ownerAvatar, messages: [] };
+                        tenantChats.push(chat);
+                    }
+                    
+                    chat.messages.push({
+                        text: `Hello! I have approved your booking request for ${b.propertyTitle}. Let me know if you have any questions!`,
+                        sender: 'owner',
+                        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                    });
+                    
+                    chat.messages.push({
+                        text: `Please submit a 10% token payment amount to officially confirm and lock in your property booking.`,
+                        sender: 'owner',
+                        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                    });
+                    localStorage.setItem('tenantChats', JSON.stringify(tenantChats));
+
                     // Refresh
-                    alert('Booking Approved! The property has been sold. You can view it in My Tenants.');
+                    alert('Booking Approved! The property has been sold. You can view it in My Tenants. A message has been sent to the tenant.');
                     window.location.reload();
+                }
+            };
+            window.rejectBooking = function (index) {
+                if (confirm('Are you sure you want to reject this booking?')) {
+                    const b = myBookings[index];
+                    if (b) {
+                        // Remove from pending bookings
+                        myBookings.splice(index, 1);
+                        localStorage.setItem('ownerBookings', JSON.stringify(myBookings));
+
+                        // Push notification to tenant
+                        let tenantNotifs = JSON.parse(localStorage.getItem('tenantNotifications') || '[]');
+                        tenantNotifs.push({
+                            id: Date.now(),
+                            title: "Booking Rejected",
+                            body: `The property owner has declined your booking for ${b.propertyTitle}.`,
+                            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                            read: false
+                        });
+                        localStorage.setItem('tenantNotifications', JSON.stringify(tenantNotifs));
+
+                        alert('Booking Rejected successfully.');
+                        window.location.reload();
+                    }
                 }
             };
         });

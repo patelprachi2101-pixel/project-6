@@ -688,6 +688,201 @@ button {
 }
 
 .form-group input:focus {
+object-fit: cover;
+    border-radius: 12px;
+}
+
+.gallery-thumbnails {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.gallery-thumbnails img {
+    flex: 1;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+
+.gallery-thumbnails img:hover {
+    opacity: 1;
+}
+
+.property-modal-details {
+    flex: 1;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.02);
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.modal-location {
+    color: var(--text-muted);
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.modal-amenities {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 1rem;
+    border-radius: 12px;
+}
+
+.modal-amenities span {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--text-main);
+}
+
+.modal-description {
+    margin-bottom: 2rem;
+    flex-grow: 1;
+}
+
+.modal-description h3 {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-main);
+}
+
+.modal-description p {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.owner-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    margin-bottom: 1rem;
+}
+
+.owner-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.owner-avatar img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--primary);
+}
+
+.owner-label {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.owner-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.owner-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.action-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.call-icon {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+}
+
+.call-icon:hover {
+    background: #10b981;
+    color: white;
+}
+
+.message-icon {
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--primary);
+}
+
+.message-icon:hover {
+    background: var(--primary);
+    color: white;
+}
+
+/* Auth Modal specifics */
+.auth-modal-content {
+    width: 400px;
+    max-width: 90vw;
+    padding: 2.5rem 2rem;
+}
+
+.auth-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.auth-header h2 {
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+}
+
+.auth-header p {
+    color: var(--text-muted);
+}
+
+.form-group {
+    margin-bottom: 1.25rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.form-group input {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border);
+    color: var(--text-main);
+    font-family: inherit;
+    font-size: 1rem;
+}
+
+.form-group input:focus {
     outline: none;
     border-color: var(--primary);
     background: rgba(0, 0, 0, 0.4);
@@ -698,4 +893,8 @@ button {
     font-size: 0.8rem;
     color: var(--text-muted);
     margin-top: 1.5rem;
+}
+
+.hidden {
+    display: none !important;
 }

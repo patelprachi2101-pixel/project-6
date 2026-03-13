@@ -336,6 +336,23 @@
                         </div>
                     </div>
 
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="prop-bedrooms">Number of Bedrooms</label>
+                            <input type="number" id="prop-bedrooms" min="1" placeholder="e.g. 2" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="prop-price">Monthly Rent Price (₹)</label>
+                            <input type="number" id="prop-price" min="0" placeholder="e.g. 15000" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 1.5rem;">
+                        <label for="prop-description">Property Description</label>
+                        <textarea id="prop-description" rows="3"
+                            placeholder="Describe the amenities, nearby places, etc." required></textarea>
+                    </div>
+
                     <div class="form-group" style="margin-bottom: 1.5rem;">
                         <label for="prop-address">Full Address</label>
                         <textarea id="prop-address" rows="3" placeholder="Enter complete property address"
@@ -409,7 +426,7 @@
                                     <circle cx="8.5" cy="8.5" r="1.5"></circle>
                                     <polyline points="21 15 16 10 5 21"></polyline>
                                 </svg>
-                                <div class="file-upload-text">Upload property photos</div>
+                                <div class="file-upload-text">Upload 3 to 5 property photos</div>
                                 <div class="file-upload-formats">JPEG, PNG only</div>
                                 <input type="file" id="photo-upload" accept="image/jpeg, image/png" multiple required>
                                 <span class="selected-file-name" id="photo-name"></span>
@@ -462,7 +479,9 @@
         function renderProperties() {
             const list = document.getElementById('my-properties-list');
             const noMsg = document.getElementById('no-properties-msg');
-            const stored = JSON.parse(localStorage.getItem('ownerProperties') || '[]');
+            const currentOwnerEmail = localStorage.getItem('ownerEmail') || 'oldOwner';
+            const allStored = JSON.parse(localStorage.getItem('ownerProperties') || '[]');
+            const stored = allStored.filter(p => (p.ownerEmail || 'oldOwner') === currentOwnerEmail);
 
             if (stored.length > 0) {
                 if (noMsg) noMsg.style.display = 'none';
@@ -567,11 +586,14 @@
             const title = document.getElementById('prop-title').value;
             const type = document.getElementById('prop-type').value;
             const address = document.getElementById('prop-address').value;
+            const bedrooms = document.getElementById('prop-bedrooms').value;
+            const price = document.getElementById('prop-price').value;
+            const description = document.getElementById('prop-description').value;
 
             // Validate all photos are "uploaded" via checking their display text isn't empty
             const photoEl = document.getElementById('photo-upload');
-            if (!photoEl.files || photoEl.files.length === 0) {
-                alert("Please attach Property Photos first!");
+            if (!photoEl.files || photoEl.files.length < 3 || photoEl.files.length > 5) {
+                alert("Please select between 3 and 5 Property Photos!");
                 return;
             }
 
@@ -585,15 +607,17 @@
             btn.style.backgroundColor = '#2ecc71';
 
             const proceedSave = (imgUrls) => {
+                const currentOwnerEmail = localStorage.getItem('ownerEmail') || 'oldOwner';
                 const stored = JSON.parse(localStorage.getItem('ownerProperties') || '[]');
-                stored.push({ title, type, address, images: imgUrls, date: new Date().toISOString() });
+                stored.push({ title, type, address, bedrooms, price, description, images: imgUrls, date: new Date().toISOString(), ownerEmail: currentOwnerEmail });
 
                 try {
                     localStorage.setItem('ownerProperties', JSON.stringify(stored));
                 } catch (err) {
                     console.log('Local storage quota exceeded, creating property without image data URL.');
+                    alert('Images are too large. Property saved with default placeholder images.');
                     stored.pop();
-                    stored.push({ title, type, address, images: ['https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80'], date: new Date().toISOString() });
+                    stored.push({ title, type, address, bedrooms, price, description, images: ['https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80', 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80', 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80'], date: new Date().toISOString(), ownerEmail: currentOwnerEmail });
                     localStorage.setItem('ownerProperties', JSON.stringify(stored));
                 }
 
@@ -622,16 +646,44 @@
             const imgUrls = [];
             let loadedCount = 0;
 
-            files.forEach(file => {
+            const resizeImage = (file, maxSize, callback) => {
                 const reader = new FileReader();
-                reader.onload = function (evt) {
-                    imgUrls.push(evt.target.result);
+                reader.onload = function (e) {
+                    const img = new Image();
+                    img.onload = function () {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+                        if (width > height) {
+                            if (width > maxSize) {
+                                height *= maxSize / width;
+                                width = maxSize;
+                            }
+                        } else {
+                            if (height > maxSize) {
+                                width *= maxSize / height;
+                                height = maxSize;
+                            }
+                        }
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        callback(canvas.toDataURL('image/jpeg', 0.6));
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            };
+
+            files.forEach(file => {
+                resizeImage(file, 800, function (compressedDataUrl) {
+                    imgUrls.push(compressedDataUrl);
                     loadedCount++;
                     if (loadedCount === files.length) {
                         proceedSave(imgUrls);
                     }
-                };
-                reader.readAsDataURL(file);
+                });
             });
         });
     </script>

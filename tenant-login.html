@@ -236,14 +236,16 @@
                 return;
             }
 
+            // Update profile with email
+            profileData.email = email;
+            if (profileData.isVerified === undefined) {
+                profileData.isVerified = false;
+            }
+            localStorage.setItem('tenantProfile', JSON.stringify(profileData));
+
             // Set basic login info
             localStorage.setItem('tenantEmail', email);
             localStorage.setItem('tenantLoggedIn', 'true');
-
-            // Set a basic profile stub with just email if it doesn't exist
-            if (!localStorage.getItem('tenantProfile')) {
-                localStorage.setItem('tenantProfile', JSON.stringify({ email: email, isVerified: false }));
-            }
 
             // Redirect to home page
             window.location.href = 'tenant-home.html';

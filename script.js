@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     getStartedBtn.addEventListener('click', () => {
         if (selectedRole === 'Tenant') {
-            window.location.href = 'tenant-home.html';
+            window.location.href = 'tenant-login.html';
         } else if (selectedRole === 'Owner') {
             window.location.href = 'owner-login.html';
         } else if (selectedRole === 'Admin') {

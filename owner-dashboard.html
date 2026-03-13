@@ -305,7 +305,24 @@
                 <div>
                     <label
                         style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--text-muted);">Address</label>
-                    <textarea id="edit-address" rows="3"
+                    <textarea id="edit-address" rows="2"
+                        style="width: 100%; padding: 0.8rem; background: var(--bg-dark); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; box-sizing: border-box;"></textarea>
+                </div>
+                <div style="display: flex; gap: 1rem;">
+                    <div style="flex: 1;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--text-muted);">Bedrooms</label>
+                        <input type="number" id="edit-bedrooms" min="1"
+                            style="width: 100%; padding: 0.8rem; background: var(--bg-dark); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; box-sizing: border-box;">
+                    </div>
+                    <div style="flex: 1;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--text-muted);">Price (₹)</label>
+                        <input type="number" id="edit-price" min="0"
+                            style="width: 100%; padding: 0.8rem; background: var(--bg-dark); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; box-sizing: border-box;">
+                    </div>
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--text-muted);">Description</label>
+                    <textarea id="edit-description" rows="3"
                         style="width: 100%; padding: 0.8rem; background: var(--bg-dark); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; box-sizing: border-box;"></textarea>
                 </div>
                 <!-- Store prop index -->
@@ -341,14 +358,17 @@
 
         function renderProperties() {
             const list = document.getElementById('my-properties-list');
-            const stored = JSON.parse(localStorage.getItem('ownerProperties') || '[]');
+            const currentOwnerEmail = localStorage.getItem('ownerEmail') || 'oldOwner';
+            const allStored = JSON.parse(localStorage.getItem('ownerProperties') || '[]');
+            const stored = allStored.filter(p => (p.ownerEmail || 'oldOwner') === currentOwnerEmail);
 
             document.getElementById('total-properties-count').innerText = stored.length;
 
             if (stored.length > 0) {
                 list.innerHTML = ''; // clear
 
-                stored.forEach((prop, index) => {
+                stored.forEach((prop) => {
+                    const globalIndex = allStored.indexOf(prop);
                     const el = document.createElement('div');
                     el.style.border = '1px solid rgba(255, 255, 255, 0.1)';
                     el.style.borderRadius = '8px';
@@ -384,7 +404,7 @@
                                 Under Review
                             </div>
                             <div style="margin-top: 0.8rem;">
-                                <button onclick="window.openEditModal(${index})" style="background: transparent; border: 1px solid rgba(255,255,255,0.2); color: var(--text-light); padding: 0.4rem 0.8rem; border-radius: 4px; font-size: 0.85rem; cursor: pointer;">Edit</button>
+                                <button onclick="window.openEditModal(${globalIndex})" style="background: transparent; border: 1px solid rgba(255,255,255,0.2); color: var(--text-light); padding: 0.4rem 0.8rem; border-radius: 4px; font-size: 0.85rem; cursor: pointer;">Edit</button>
                             </div>
                         </div>
                     `;
@@ -404,6 +424,9 @@
             document.getElementById('edit-prop-index').value = index;
             document.getElementById('edit-title').value = prop.title || '';
             document.getElementById('edit-address').value = prop.address || '';
+            document.getElementById('edit-bedrooms').value = prop.bedrooms || '';
+            document.getElementById('edit-price').value = prop.price || '';
+            document.getElementById('edit-description').value = prop.description || '';
             document.getElementById('edit-property-modal').style.display = 'flex';
         }
 
@@ -415,11 +438,17 @@
             const index = document.getElementById('edit-prop-index').value;
             const newTitle = document.getElementById('edit-title').value;
             const newAddr = document.getElementById('edit-address').value;
+            const newBeds = document.getElementById('edit-bedrooms').value;
+            const newPrice = document.getElementById('edit-price').value;
+            const newDesc = document.getElementById('edit-description').value;
 
             const stored = JSON.parse(localStorage.getItem('ownerProperties') || '[]');
             if (stored[index]) {
                 stored[index].title = newTitle;
                 stored[index].address = newAddr;
+                stored[index].bedrooms = newBeds;
+                stored[index].price = newPrice;
+                stored[index].description = newDesc;
                 localStorage.setItem('ownerProperties', JSON.stringify(stored));
 
                 document.getElementById('edit-property-modal').style.display = 'none';
