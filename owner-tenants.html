@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Tenants - Owner Portal</title>
+    <title>Property Finder</title>
     <link rel="stylesheet" href="tenant-styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -159,7 +159,7 @@
                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                 <polyline points="9 22 9 12 15 12 15 22"></polyline>
             </svg>
-            <h2>OwnerPortal</h2>
+            <h2>Property Finder</h2>
         </a>
         <div class="nav-links">
             <a href="owner-dashboard.html" class="nav-link">Properties</a>
@@ -293,6 +293,7 @@
                 `;
             } else {
                 myBookings.forEach((b, index) => {
+                    if (b.status && b.status !== 'Pending Owner') return;
                     const t = b.tenantProfile || {};
                     const avatarStr = t.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80';
                     const nameStr = t.name || t.email || 'Tenant User';
@@ -368,52 +369,10 @@
             window.approveBooking = function (index) {
                 const b = myBookings[index];
                 if (b) {
-                    // Get current approved tenants
-                    let approvedTenants = JSON.parse(localStorage.getItem('approvedTenants') || '[]');
-                    approvedTenants.push(b);
-                    localStorage.setItem('approvedTenants', JSON.stringify(approvedTenants));
-
-                    // Remove from pending bookings
-                    myBookings.splice(index, 1);
+                    b.status = 'Pending Admin';
                     localStorage.setItem('ownerBookings', JSON.stringify(myBookings));
 
-                    // Push notification to tenant
-                    let tenantNotifs = JSON.parse(localStorage.getItem('tenantNotifications') || '[]');
-                    tenantNotifs.push({
-                        id: Date.now(),
-                        title: "Owner Approved Booking",
-                        body: `The property owner has approved your booking for ${b.propertyTitle}!`,
-                        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                        read: false
-                    });
-                    localStorage.setItem('tenantNotifications', JSON.stringify(tenantNotifs));
-
-                    // Push automated chat message to tenant
-                    let tenantChats = JSON.parse(localStorage.getItem('tenantChats') || '[]');
-                    const ownerId = ownerName.replace(/\s+/g, '-').toLowerCase();
-                    const ownerAvatar = 'https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80';
-                    
-                    let chat = tenantChats.find(c => c.id === ownerId);
-                    if (!chat) {
-                        chat = { id: ownerId, name: ownerName, avatar: ownerAvatar, messages: [] };
-                        tenantChats.push(chat);
-                    }
-                    
-                    chat.messages.push({
-                        text: `Hello! I have approved your booking request for ${b.propertyTitle}. Let me know if you have any questions!`,
-                        sender: 'owner',
-                        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                    });
-                    
-                    chat.messages.push({
-                        text: `Please submit a 10% token payment amount to officially confirm and lock in your property booking.`,
-                        sender: 'owner',
-                        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                    });
-                    localStorage.setItem('tenantChats', JSON.stringify(tenantChats));
-
-                    // Refresh
-                    alert('Booking Approved! The property has been sold. You can view it in My Tenants. A message has been sent to the tenant.');
+                    alert('Booking Confirmed! It has been forwarded to the Admin for final approval.');
                     window.location.reload();
                 }
             };

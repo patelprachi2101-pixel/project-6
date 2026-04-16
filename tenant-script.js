@@ -4,8 +4,27 @@ document.addEventListener('DOMContentLoaded', () => {
     // Inject owner properties from localStorage
     if (propertiesGrid) {
         const storedOwnerProps = JSON.parse(localStorage.getItem('ownerProperties') || '[]');
+        const ownerProfile = JSON.parse(localStorage.getItem('ownerProfile') || '{}');
+        const isOwnerApproved = ownerProfile.isVerified === true && ownerProfile.isBlocked !== true;
         const displayOwnerName = localStorage.getItem('ownerName') || 'Property Owner';
+        
+        const typeSelect = document.getElementById('property-type');
+        const currentType = (typeSelect && typeSelect.value) ? typeSelect.value.toLowerCase() : '';
+
+        const locSelect = document.getElementById('location');
+        const currentLoc = (locSelect && locSelect.value) ? locSelect.value.toLowerCase() : '';
+
         storedOwnerProps.forEach(prop => {
+            const propApproved = prop.isApproved === true || (prop.approvalStatus || '').toLowerCase() === 'active';
+            if (!isOwnerApproved || !propApproved) {
+                return;
+            }
+            if (currentType && prop.type && prop.type.toLowerCase() !== currentType) {
+                return;
+            }
+            if (currentLoc && prop.address && !prop.address.toLowerCase().includes(currentLoc)) {
+                return;
+            }
             const card = document.createElement('div');
             card.className = 'property-card';
             card.setAttribute('data-owner-name', displayOwnerName);
@@ -14,13 +33,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const imagesArr = prop.images || (prop.image ? [prop.image] : ['https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80']);
             const mainImgSrc = imagesArr[0];
 
+            const listingSuffix = (prop.listingType === 'sell' || prop.type === 'house') ? '' : '<span>/mo</span>';
+            const defaultSuffix = (prop.listingType === 'sell' || prop.type === 'house') ? ' for Sale' : ' for Rent';
+            
             card.innerHTML = `
                 <div class="property-image" style="background-image: url('${mainImgSrc}');">
                     <span class="badge" style="background-color: var(--primary-color);">New</span>
                 </div>
                 <div class="property-details">
-                    <div class="price">₹${Math.floor(Math.random() * 20 + 10)},000<span>/mo</span></div>
-                    <h3>${prop.title || (prop.type ? prop.type.charAt(0).toUpperCase() + prop.type.slice(1) + ' for Rent' : 'Premium Property')}</h3>
+                    <div class="price">₹${prop.price ? Number(prop.price).toLocaleString('en-IN') : Math.floor(Math.random() * 20 + 10) + ',000'}${listingSuffix}</div>
+                    <h3>${prop.title || (prop.type ? prop.type.charAt(0).toUpperCase() + prop.type.slice(1) + defaultSuffix : 'Premium Property')}</h3>
                     <p class="location">${prop.address || 'Address not provided'}</p>
                     <div class="amenities">
                         <span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg> ${(prop.type || '').toLowerCase() === 'pg' ? '1 Bed' : '2 BHK'}</span>
@@ -247,6 +269,21 @@ document.addEventListener('DOMContentLoaded', () => {
                     document.getElementById('modal-main-img').src = url;
                 }
 
+                // Dynamically update modal listing type based on price display
+                const priceText = card.querySelector('.price').textContent.toLowerCase();
+                const listingTypeText = priceText.includes('/mo') ? 'For Rent' : 'For Sale';
+                const modalListingType = document.getElementById('modal-listing-type');
+                if (modalListingType) {
+                    modalListingType.textContent = listingTypeText;
+                    if (listingTypeText === 'For Sale') {
+                        modalListingType.style.backgroundColor = 'rgba(46, 204, 113, 0.2)';
+                        modalListingType.style.color = '#2ecc71';
+                    } else {
+                        modalListingType.style.backgroundColor = 'rgba(52, 152, 219, 0.2)';
+                        modalListingType.style.color = '#3498db';
+                    }
+                }
+
                 // Update owner details
                 document.querySelector('.owner-name').textContent = ownerName;
                 document.querySelector('.owner-avatar img').src = ownerAvatar;
@@ -280,12 +317,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Save to bookings
                 let bookings = JSON.parse(localStorage.getItem('ownerBookings') || '[]');
                 bookings.push({
+                    id: 'REQ-' + Math.floor(1000 + Math.random() * 9000),
                     ownerName: ownerName,
                     propertyTitle: propertyTitle,
                     propertyLoc: propertyLoc,
                     propertyImage: propertyImage,
                     tenantProfile: JSON.parse(localStorage.getItem('tenantProfile') || '{}'),
-                    date: new Date().toISOString()
+                    date: new Date().toISOString(),
+                    status: 'Pending Owner'
                 });
                 localStorage.setItem('ownerBookings', JSON.stringify(bookings));
 
@@ -337,133 +376,44 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Handle search redirection
+                                                                        // Handle search redirection
     const searchBtn = document.querySelector('.btn-search');
     if (searchBtn) {
         searchBtn.addEventListener('click', () => {
             const loc = document.getElementById('location')?.value;
-            const type = document.getElementById('property-type')?.value;
+            let type = document.getElementById('property-type')?.value;
+            
+            if (!type) {
+                const urlPath = window.location.pathname.toLowerCase();
+                if (urlPath.includes('pg.html')) type = 'pg';
+                else if (urlPath.includes('house.html')) type = 'house';
+                else if (urlPath.includes('villa.html')) type = 'villa';
+                else if (urlPath.includes('apartments.html')) type = 'apartment';
+            }
 
-            if (loc && (type === 'apartment' || type === 'pg' || type === 'villa' || type === 'house')) {
+            if (loc && (type === 'apartment' || type === 'pg' || type === 'house' || type === 'villa')) {
                 const cities = ['ahmedabad', 'surat', 'jamnagar', 'mehsana', 'gandhinagar', 'rajkot', 'bhavnagar'];
                 if (cities.includes(loc)) {
                     const currentPath = window.location.pathname;
                     let targetFile = 'apartments.html';
                     if (type === 'pg') targetFile = 'pg.html';
-                    if (type === 'villa') targetFile = 'villa.html';
                     if (type === 'house') targetFile = 'house.html';
-
+                    if (type === 'villa') targetFile = 'villa.html';
+                    
                     if (cities.some(c => currentPath.includes('/' + c + '/'))) {
-                        if (currentPath.includes('/' + loc + '/')) {
-                            window.location.href = targetFile;
-                        } else {
-                            window.location.href = '../' + loc + '/' + targetFile;
-                        }
+                         if (currentPath.includes('/' + loc + '/')) {
+                             window.location.href = targetFile;
+                         } else {
+                             window.location.href = '../' + loc + '/' + targetFile;
+                         }
                     } else {
-                        window.location.href = loc + '/' + targetFile;
+                         window.location.href = loc + '/' + targetFile;
                     }
                 } else {
                     alert('Location missing. Select a valid city.');
                 }
             } else {
-                alert('No properties found for this specific filter in this demo. Try Apartment, House, PG, or Villa.');
-            }
-        });
-    }
-
-    // Inject Notifications
-    const navLinks = document.querySelector('.nav-links');
-    if (navLinks && localStorage.getItem('tenantLoggedIn') === 'true') {
-        let tenantNotifs = JSON.parse(localStorage.getItem('tenantNotifications') || '[]');
-        let unreadCount = tenantNotifs.filter(n => !n.read).length;
-
-        const notifContainerHTML = `
-            <div id="nav-notif-btn" class="nav-link" style="position:relative; cursor:pointer;" title="Notifications">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;">
-                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-                    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-                </svg>
-                <span id="nav-notif-badge" class="badge-count ${unreadCount === 0 ? 'hidden' : ''}" style="top:-5px; right:-10px;">${unreadCount}</span>
-                
-                <div id="nav-notif-dropdown" style="display:none; position:absolute; top:40px; right: -50px; width: 320px; background:var(--surface-color); border:1px solid rgba(255,255,255,0.1); border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,0.5); z-index:1000; flex-direction:column; cursor:default;">
-                    <div style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); display:flex; justify-content:space-between; align-items:center;">
-                        <h4 style="margin:0; font-size:1.1rem; color:var(--text-light);">Notifications</h4>
-                        ${unreadCount > 0 ? `<button id="notif-mark-read" style="background:none; border:none; color:var(--primary-color); font-size:0.8rem; cursor:pointer;">Mark all read</button>` : ''}
-                    </div>
-                    <div id="nav-notif-list" style="max-height: 350px; overflow-y:auto; padding: 0.5rem 0; text-align: left;">
-                        <!-- dynamic items -->
-                    </div>
-                </div>
-            </div>
-        `;
-        navLinks.insertAdjacentHTML('beforeend', notifContainerHTML);
-
-        const notifBtn = document.getElementById('nav-notif-btn');
-        const notifDropdown = document.getElementById('nav-notif-dropdown');
-        const notifList = document.getElementById('nav-notif-list');
-        const markReadBtn = document.getElementById('notif-mark-read');
-        const badge = document.getElementById('nav-notif-badge');
-
-        function renderNotifs() {
-            tenantNotifs = JSON.parse(localStorage.getItem('tenantNotifications') || '[]');
-            unreadCount = tenantNotifs.filter(n => !n.read).length;
-
-            if (unreadCount > 0) {
-                badge.textContent = unreadCount;
-                badge.classList.remove('hidden');
-                if (markReadBtn) markReadBtn.style.display = 'block';
-            } else {
-                badge.classList.add('hidden');
-                if (markReadBtn) markReadBtn.style.display = 'none';
-            }
-
-            if (tenantNotifs.length === 0) {
-                notifList.innerHTML = `<div style="padding: 1.5rem; text-align:center; color:var(--text-muted); font-size:0.9rem;">No notifications yet.</div>`;
-                return;
-            }
-
-            // Sort newest first
-            const sorted = [...tenantNotifs].sort((a, b) => b.id - a.id);
-            let html = '';
-            sorted.forEach(n => {
-                html += `
-                    <div style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); ${!n.read ? 'background: rgba(52, 152, 219, 0.05);' : ''}">
-                        <div style="display:flex; justify-content:space-between; margin-bottom:0.3rem;">
-                            <strong style="font-size:0.9rem; color:${!n.read ? 'var(--primary-color)' : 'var(--text-light)'}">${n.title}</strong>
-                            <span style="font-size:0.75rem; color:var(--text-muted);">${n.time}</span>
-                        </div>
-                        <p style="margin:0; font-size:0.85rem; color:var(--text-muted); line-height:1.4;">${n.body}</p>
-                    </div>
-                `;
-            });
-            notifList.innerHTML = html;
-        }
-
-        notifBtn.addEventListener('click', (e) => {
-            if (e.target.closest('#nav-notif-dropdown') && e.target.id !== 'notif-mark-read') {
-                return; // Prevent closing if clicking inside dropdown content
-            }
-            if (notifDropdown.style.display === 'none') {
-                renderNotifs();
-                notifDropdown.style.display = 'flex';
-            } else {
-                notifDropdown.style.display = 'none';
-            }
-        });
-
-        if (markReadBtn) {
-            markReadBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                tenantNotifs.forEach(n => n.read = true);
-                localStorage.setItem('tenantNotifications', JSON.stringify(tenantNotifs));
-                renderNotifs();
-            });
-        }
-
-        // click outside to hide dropdown
-        window.addEventListener('click', (e) => {
-            if (!notifBtn.contains(e.target) && notifDropdown.style.display === 'flex') {
-                notifDropdown.style.display = 'none';
+                alert('No properties found for this specific filter in this demo. Try Apartment, PG, House, or Villa.');
             }
         });
     }

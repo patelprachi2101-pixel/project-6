@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Owner Dashboard - Tenant Portal</title>
+    <title>Property Finder</title>
     <link rel="stylesheet" href="tenant-styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -194,6 +194,23 @@
             text-overflow: ellipsis;
         }
 
+        .selected-file-links {
+            margin-top: 0.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+            text-align: left;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+
+        .selected-file-links a {
+            color: #5dade2;
+            font-size: 0.82rem;
+            text-decoration: underline;
+            word-break: break-all;
+        }
+
         .btn-submit {
             background-color: var(--primary-color);
             color: white;
@@ -234,7 +251,7 @@
                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                 <polyline points="9 22 9 12 15 12 15 22"></polyline>
             </svg>
-            <h2>OwnerPortal</h2>
+            <h2>Property Finder</h2>
         </a>
         <div class="nav-links">
             <a href="owner-dashboard.html" class="nav-link">Properties</a>
@@ -338,13 +355,22 @@
 
                     <div class="form-row">
                         <div class="form-group">
+                            <label for="prop-listing-type">Listing Type</label>
+                            <select id="prop-listing-type" required>
+                                <option value="">Select Option</option>
+                                <option value="rent">Rent</option>
+                                <option value="sell">Sell</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
                             <label for="prop-bedrooms">Number of Bedrooms</label>
                             <input type="number" id="prop-bedrooms" min="1" placeholder="e.g. 2" required>
                         </div>
-                        <div class="form-group">
-                            <label for="prop-price">Monthly Rent Price (₹)</label>
-                            <input type="number" id="prop-price" min="0" placeholder="e.g. 15000" required>
-                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 1.5rem;">
+                        <label for="prop-price" id="label-prop-price">Monthly Rent Price (₹)</label>
+                        <input type="number" id="prop-price" min="0" placeholder="e.g. 15000" required>
                     </div>
 
                     <div class="form-group" style="margin-bottom: 1.5rem;">
@@ -426,10 +452,11 @@
                                     <circle cx="8.5" cy="8.5" r="1.5"></circle>
                                     <polyline points="21 15 16 10 5 21"></polyline>
                                 </svg>
-                                <div class="file-upload-text">Upload 3 to 5 property photos</div>
+                                <div class="file-upload-text">Upload 1 property photo</div>
                                 <div class="file-upload-formats">JPEG, PNG only</div>
-                                <input type="file" id="photo-upload" accept="image/jpeg, image/png" multiple required>
+                                <input type="file" id="photo-upload" accept="image/jpeg, image/png" required>
                                 <span class="selected-file-name" id="photo-name"></span>
+                                <div id="photo-link-container" class="selected-file-links"></div>
                                 <div id="photo-preview-container"
                                     style="display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; justify-content: center;">
                                 </div>
@@ -550,9 +577,19 @@
                         // Handle image preview
                         if (item.isPhoto) {
                             const previewContainer = document.getElementById('photo-preview-container');
+                            const linkContainer = document.getElementById('photo-link-container');
                             if (previewContainer) {
                                 previewContainer.innerHTML = '';
+                                if (linkContainer) linkContainer.innerHTML = '';
                                 Array.from(this.files).forEach(file => {
+                                    if (linkContainer) {
+                                        const fileLink = document.createElement('a');
+                                        fileLink.href = URL.createObjectURL(file);
+                                        fileLink.target = '_blank';
+                                        fileLink.rel = 'noopener noreferrer';
+                                        fileLink.textContent = file.name;
+                                        linkContainer.appendChild(fileLink);
+                                    }
                                     const reader = new FileReader();
                                     reader.onload = function (e) {
                                         const img = document.createElement('img');
@@ -573,9 +610,43 @@
                         if (item.isPhoto) {
                             const previewContainer = document.getElementById('photo-preview-container');
                             if (previewContainer) previewContainer.innerHTML = '';
+                            const linkContainer = document.getElementById('photo-link-container');
+                            if (linkContainer) linkContainer.innerHTML = '';
                         }
                     }
                 });
+            }
+        });
+
+        // Update rent/sell options dynamically
+        const propTypeSelect = document.getElementById('prop-type');
+        const listingTypeSelect = document.getElementById('prop-listing-type');
+        const priceLabel = document.getElementById('label-prop-price');
+        const priceInput = document.getElementById('prop-price');
+
+        propTypeSelect.addEventListener('change', (e) => {
+            const val = e.target.value;
+            listingTypeSelect.innerHTML = '<option value="">Select Option</option>';
+            if (val === 'house') {
+                listingTypeSelect.innerHTML += '<option value="sell" selected>Sell</option>';
+            } else if (val === 'pg') {
+                listingTypeSelect.innerHTML += '<option value="rent" selected>Rent</option>';
+            } else {
+                listingTypeSelect.innerHTML += '<option value="rent">Rent</option><option value="sell">Sell</option>';
+            }
+            listingTypeSelect.dispatchEvent(new Event('change'));
+        });
+
+        listingTypeSelect.addEventListener('change', (e) => {
+            const val = e.target.value;
+            if (val === 'sell') {
+                priceLabel.innerText = 'Selling Price (₹)';
+                priceInput.placeholder = 'e.g. 15000000';
+            } else if (val === 'rent') {
+                priceLabel.innerText = 'Monthly Rent Price (₹)';
+                priceInput.placeholder = 'e.g. 15000';
+            } else {
+                priceLabel.innerText = 'Price (₹)';
             }
         });
 
@@ -585,6 +656,7 @@
 
             const title = document.getElementById('prop-title').value;
             const type = document.getElementById('prop-type').value;
+            const listingType = document.getElementById('prop-listing-type').value;
             const address = document.getElementById('prop-address').value;
             const bedrooms = document.getElementById('prop-bedrooms').value;
             const price = document.getElementById('prop-price').value;
@@ -592,8 +664,8 @@
 
             // Validate all photos are "uploaded" via checking their display text isn't empty
             const photoEl = document.getElementById('photo-upload');
-            if (!photoEl.files || photoEl.files.length < 3 || photoEl.files.length > 5) {
-                alert("Please select between 3 and 5 Property Photos!");
+            if (!photoEl.files || photoEl.files.length !== 1) {
+                alert("Please select exactly 1 Property Photo!");
                 return;
             }
 
@@ -609,7 +681,22 @@
             const proceedSave = (imgUrls) => {
                 const currentOwnerEmail = localStorage.getItem('ownerEmail') || 'oldOwner';
                 const stored = JSON.parse(localStorage.getItem('ownerProperties') || '[]');
-                stored.push({ title, type, address, bedrooms, price, description, images: imgUrls, date: new Date().toISOString(), ownerEmail: currentOwnerEmail });
+                const propertyId = 'OWN-' + Date.now();
+                stored.push({
+                    id: propertyId,
+                    title,
+                    type,
+                    listingType,
+                    address,
+                    bedrooms,
+                    price,
+                    description,
+                    images: imgUrls,
+                    date: new Date().toISOString(),
+                    ownerEmail: currentOwnerEmail,
+                    approvalStatus: 'pending',
+                    isApproved: false
+                });
 
                 try {
                     localStorage.setItem('ownerProperties', JSON.stringify(stored));
@@ -617,7 +704,21 @@
                     console.log('Local storage quota exceeded, creating property without image data URL.');
                     alert('Images are too large. Property saved with default placeholder images.');
                     stored.pop();
-                    stored.push({ title, type, address, bedrooms, price, description, images: ['https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80', 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80', 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80'], date: new Date().toISOString(), ownerEmail: currentOwnerEmail });
+                    stored.push({
+                        id: propertyId,
+                        title,
+                        type,
+                        listingType,
+                        address,
+                        bedrooms,
+                        price,
+                        description,
+                        images: ['https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80'],
+                        date: new Date().toISOString(),
+                        ownerEmail: currentOwnerEmail,
+                        approvalStatus: 'pending',
+                        isApproved: false
+                    });
                     localStorage.setItem('ownerProperties', JSON.stringify(stored));
                 }
 
@@ -633,6 +734,8 @@
 
                     const previewContainer = document.getElementById('photo-preview-container');
                     if (previewContainer) previewContainer.innerHTML = '';
+                    const linkContainer = document.getElementById('photo-link-container');
+                    if (linkContainer) linkContainer.innerHTML = '';
 
                     btn.innerHTML = 'Submit Property for Review';
                     btn.style.backgroundColor = '';

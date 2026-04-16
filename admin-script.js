@@ -382,6 +382,7 @@ function switchSection(secId, navElement) {
         }
 
         let adminAllProperties = [];
+        let currentModalPropertyId = null;
 
         function generateMockProperties() {
             const defaultOwners = ["Arjun Mehta", "Rakesh Joshi", "Sunil Dutt", "Neha Patel", "Kabir Singh", "Sneha Desai", "Kiran Patel", "Manoj Shah", "Kavita Kulkarni"];
@@ -427,14 +428,20 @@ function switchSection(secId, navElement) {
                         let pId = prop.id ? prop.id.toString() : ('DYN-' + idx);
                         let finalId = pId.startsWith('PROP-') ? pId : ('PROP-' + pId);
                         realDynamicIds.push(finalId);
+                        const normalizedStatus = (prop.approvalStatus || '').toLowerCase();
+                        const finalStatus = (prop.isApproved === true || normalizedStatus === 'active' || normalizedStatus === 'approved') ? 'Active' : 'Pending';
+
                         if (!adminAllProperties.some(p => p.id === finalId)) {
                             adminAllProperties.unshift({
                                 id: finalId,
                                 name: prop.type ? (prop.type + (prop.location ? ' in ' + prop.location : '')) : 'Dynamic Property',
                                 owner: localStorage.getItem('ownerName') || 'System Owner',
                                 type: prop.type || 'Property',
-                                status: 'Active'
+                                status: finalStatus
                             });
+                        } else {
+                            const existing = adminAllProperties.find(p => p.id === finalId);
+                            if (existing) existing.status = finalStatus;
                         }
                     });
                 } catch (e) { }
@@ -498,6 +505,7 @@ function switchSection(secId, navElement) {
         function openPropertyModal(propId) {
             const prop = adminAllProperties.find(p => p.id === propId);
             if (!prop) return;
+            currentModalPropertyId = propId;
 
             document.getElementById('property-modal-title').textContent = prop.name;
             const modalBody = document.getElementById('property-modal-body');
@@ -560,11 +568,58 @@ function switchSection(secId, navElement) {
                 </div>
             `;
 
+            const approveBtn = document.getElementById('property-approve-btn');
+            if (approveBtn) {
+                if (prop.status === 'Pending') {
+                    approveBtn.style.display = 'inline-block';
+                    approveBtn.disabled = false;
+                    approveBtn.textContent = 'Approve Property';
+                    approveBtn.style.cursor = 'pointer';
+                    approveBtn.style.background = 'var(--success-color)';
+                } else {
+                    approveBtn.style.display = 'inline-block';
+                    approveBtn.disabled = true;
+                    approveBtn.textContent = (prop.status === 'Active') ? 'Already Approved' : 'Cannot Approve';
+                    approveBtn.style.cursor = 'not-allowed';
+                    approveBtn.style.background = 'rgba(255,255,255,0.2)';
+                }
+            }
+
             document.getElementById('property-modal').classList.remove('hidden');
         }
 
         function closePropertyModal() {
             document.getElementById('property-modal').classList.add('hidden');
+            currentModalPropertyId = null;
+        }
+
+        function approveProperty() {
+            if (!currentModalPropertyId) return;
+
+            const prop = adminAllProperties.find(p => p.id === currentModalPropertyId);
+            if (!prop || prop.status !== 'Pending') return;
+
+            prop.status = 'Active';
+
+            const storedPropsStr = localStorage.getItem('ownerProperties');
+            if (storedPropsStr) {
+                try {
+                    const allProps = JSON.parse(storedPropsStr);
+                    const updated = allProps.map((p, idx) => {
+                        const rawId = p.id ? p.id.toString() : ('DYN-' + idx);
+                        const compareId = rawId.startsWith('PROP-') ? rawId : ('PROP-' + rawId);
+                        if (compareId === currentModalPropertyId) {
+                            return { ...p, approvalStatus: 'active', isApproved: true };
+                        }
+                        return p;
+                    });
+                    localStorage.setItem('ownerProperties', JSON.stringify(updated));
+                } catch (e) { }
+            }
+
+            loadProperties();
+            closePropertyModal();
+            alert('Property approved successfully. It is now visible on tenant side.');
         }
 
         let adminAllBookings = [];
@@ -575,16 +630,38 @@ function switchSection(secId, navElement) {
 
             if (adminAllBookings.length === 0) {
                 adminAllBookings = [
-                    { id: 'REQ-551', prop: 'Luxury Villa Surat', tenantName: 'Alexander Doe', tenantEmail: 'alexander.doe@example.com', tenantPhone: '+91 98765 11111', occupation: 'Businessman', rent: '₹45,000', status: 'Pending' },
-                    { id: 'REQ-552', prop: 'Premium Apartment Ahmedabad', tenantName: 'Raj Patel', tenantEmail: 'raj.patel@example.com', tenantPhone: '+91 98765 22222', occupation: 'Software Engineer', rent: '₹25,000', status: 'Pending' },
+                    { id: 'REQ-551', prop: 'Luxury Villa Surat', tenantName: 'Alexander Doe', tenantEmail: 'alexander.doe@example.com', tenantPhone: '+91 98765 11111', occupation: 'Businessman', rent: '₹45,000', status: 'Pending Admin' },
+                    { id: 'REQ-552', prop: 'Premium Apartment Ahmedabad', tenantName: 'Raj Patel', tenantEmail: 'raj.patel@example.com', tenantPhone: '+91 98765 22222', occupation: 'Software Engineer', rent: '₹25,000', status: 'Pending Admin' },
                     { id: 'REQ-553', prop: 'Cozy PG Room', tenantName: 'Samantha Smith', tenantEmail: 'samantha.smith@example.com', tenantPhone: '+91 98765 33333', occupation: 'Student', rent: '₹8,000', status: 'Verified' }
                 ];
             }
 
+            const ownerBookingsStr = localStorage.getItem('ownerBookings');
+            let dynamicBookings = [];
+            if (ownerBookingsStr) {
+                const storedBookings = JSON.parse(ownerBookingsStr);
+                dynamicBookings = storedBookings.map((b, idx) => ({
+                    id: b.id || ('REQ-DYN-' + idx),
+                    prop: b.propertyTitle || 'Unknown',
+                    tenantName: b.tenantProfile?.name || 'Unknown',
+                    tenantEmail: b.tenantProfile?.email || 'N/A',
+                    tenantPhone: b.tenantProfile?.phone || 'N/A',
+                    occupation: b.tenantProfile?.occupation || 'N/A',
+                    rent: b.rent || 'Negotiated',
+                    status: b.status || 'Pending Owner',
+                    originalIndex: idx,
+                    rawBooking: b
+                }));
+            }
+            
+            const allToDisplay = [...dynamicBookings, ...adminAllBookings];
+            window.renderedBookingsForAdmin = allToDisplay;
+
             let html = '';
-            adminAllBookings.forEach(booking => {
+            allToDisplay.forEach((booking, idx) => {
                 let statusHtml = '';
-                if (booking.status === 'Pending') statusHtml = '<span class="badge pending">Request Pending</span>';
+                if (booking.status === 'Pending Owner') statusHtml = '<span class="badge pending">Pending Owner</span>';
+                else if (booking.status === 'Pending Admin' || booking.status === 'Pending') statusHtml = '<span class="badge warning" style="background:#f39c12; color:#fff;">Pending Admin</span>';
                 else if (booking.status === 'Verified') statusHtml = '<span class="badge active">Confirmed</span>';
 
                 html += `
@@ -595,7 +672,7 @@ function switchSection(secId, navElement) {
                             <td>${booking.rent}</td>
                             <td>${statusHtml}</td>
                             <td>
-                                <button class="action-btn" onclick="openBookingModal('${booking.id}')">Details</button>
+                                <button class="action-btn" onclick="openBookingModal(${idx})">Details</button>
                             </td>
                         </tr>
                     `;
@@ -606,11 +683,11 @@ function switchSection(secId, navElement) {
 
         let currentBookingId = null;
 
-        function openBookingModal(bkId) {
-            const booking = adminAllBookings.find(b => b.id === bkId);
+        function openBookingModal(idx) {
+            const booking = window.renderedBookingsForAdmin[idx];
             if (!booking) return;
 
-            currentBookingId = bkId;
+            currentBookingId = idx;
 
             document.getElementById('booking-modal-title').textContent = 'Booking Request: #' + booking.id;
             const modalBody = document.getElementById('booking-modal-body');
@@ -627,7 +704,7 @@ function switchSection(secId, navElement) {
                         <h4 style="margin-top: 0; color: var(--success-color);">Tenant Identification</h4>
                         <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 1rem;">
                             <div style="width: 50px; height: 50px; background-color: var(--surface-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: bold; color: var(--text-light); border: 2px solid var(--primary-color);">
-                                ${booking.tenantName.charAt(0)}
+                                ${(booking.tenantName || 'U').charAt(0)}
                             </div>
                             <div>
                                 <h4 style="margin: 0; font-size: 1.1rem;">${booking.tenantName}</h4>
@@ -650,9 +727,16 @@ function switchSection(secId, navElement) {
                 approveBtn.style.background = 'rgba(255,255,255,0.1)';
                 approveBtn.disabled = true;
                 approveBtn.style.cursor = 'not-allowed';
+            } else if (booking.status === 'Pending Owner') {
+                approveBtn.textContent = 'Awaiting Owner Confirmation';
+                approveBtn.style.background = 'rgba(255,255,255,0.2)';
+                approveBtn.style.color = '#fff';
+                approveBtn.disabled = true;
+                approveBtn.style.cursor = 'not-allowed';
             } else {
                 approveBtn.textContent = 'Approve Request';
                 approveBtn.style.background = 'var(--success-color)';
+                approveBtn.style.color = '#fff';
                 approveBtn.disabled = false;
                 approveBtn.style.cursor = 'pointer';
             }
@@ -665,19 +749,70 @@ function switchSection(secId, navElement) {
         }
 
         function approveBooking() {
-            if (!currentBookingId) return;
+            if (currentBookingId === null) return;
             if (confirm('Are you sure you want to approve this booking request?')) {
-                const booking = adminAllBookings.find(b => b.id === currentBookingId);
+                const booking = window.renderedBookingsForAdmin[currentBookingId];
                 if (booking) {
                     booking.status = 'Verified';
 
-                    // Push confirmed message to tenant chat
+                    if (booking.rawBooking && booking.originalIndex !== undefined) {
+                        const ownerBookingsStr = localStorage.getItem('ownerBookings');
+                        if (ownerBookingsStr) {
+                            let storedBookings = JSON.parse(ownerBookingsStr);
+                            storedBookings[booking.originalIndex].status = 'Verified';
+                            localStorage.setItem('ownerBookings', JSON.stringify(storedBookings));
+                        }
+                        
+                        let approvedTenants = JSON.parse(localStorage.getItem('approvedTenants') || '[]');
+                        booking.rawBooking.status = 'Verified';
+                        approvedTenants.push(booking.rawBooking);
+                        localStorage.setItem('approvedTenants', JSON.stringify(approvedTenants));
+                        
+                        let tenantNotifs = JSON.parse(localStorage.getItem('tenantNotifications') || '[]');
+                        tenantNotifs.push({
+                            id: Date.now(),
+                            title: "Owner Approved Booking",
+                            body: `The property owner has approved your booking for ${booking.rawBooking.propertyTitle || booking.prop}!`,
+                            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                            read: false
+                        });
+                        localStorage.setItem('tenantNotifications', JSON.stringify(tenantNotifs));
+
+                        let tenantChats = JSON.parse(localStorage.getItem('tenantChats') || '[]');
+                        const ownerName = booking.rawBooking.ownerName || 'Property Owner';
+                        const ownerId = ownerName.replace(/\s+/g, '-').toLowerCase();
+                        const ownerAvatar = 'https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80';
+                        
+                        let chat = tenantChats.find(c => c.id === ownerId);
+                        if (!chat) {
+                            chat = { id: ownerId, name: ownerName, avatar: ownerAvatar, messages: [] };
+                            tenantChats.push(chat);
+                        }
+                        
+                        chat.messages.push({
+                            text: `Hello! I have approved your booking request for ${booking.rawBooking.propertyTitle}. Let me know if you have any questions!`,
+                            sender: 'owner',
+                            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                        });
+                        
+                        chat.messages.push({
+                            text: `Please submit a 10% token payment amount to officially confirm and lock in your property booking.`,
+                            sender: 'owner',
+                            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                        });
+                        localStorage.setItem('tenantChats', JSON.stringify(tenantChats));
+
+                    } else {
+                        const bStatic = adminAllBookings.find(b => b.id === booking.id);
+                        if (bStatic) bStatic.status = 'Verified';
+                    }
+
                     let tenantChats = JSON.parse(localStorage.getItem('tenantChats') || '[]');
                     let sysChat = tenantChats.find(c => c.id === 'sysAdmin');
                     if (!sysChat) {
                         sysChat = {
                             id: "sysAdmin",
-                            name: "Property Owner (via Admin)",
+                            name: "Platform Administrator",
                             avatar: "https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
                             messages: []
                         };
@@ -691,7 +826,6 @@ function switchSection(secId, navElement) {
                     });
                     localStorage.setItem('tenantChats', JSON.stringify(tenantChats));
 
-                    // Push notification to tenantNotifications
                     let tenantNotifs = JSON.parse(localStorage.getItem('tenantNotifications') || '[]');
                     tenantNotifs.push({
                         id: Date.now(),
@@ -702,7 +836,7 @@ function switchSection(secId, navElement) {
                     });
                     localStorage.setItem('tenantNotifications', JSON.stringify(tenantNotifs));
 
-                    loadBookings(); // re-render the table
+                    loadBookings();
 
                     const approveBtn = document.getElementById('booking-approve-btn');
                     if (approveBtn) {
@@ -835,7 +969,11 @@ function switchSection(secId, navElement) {
                 if (storedPropsStr) {
                     let allProps = JSON.parse(storedPropsStr);
                     // Match id ignoring 'PROP-' prefix
-                    let filteredProps = allProps.filter(p => !p.id || propId !== p.id.toString() && propId !== ('PROP-' + p.id));
+                    let filteredProps = allProps.filter((p, idx) => {
+                        const rawId = p.id ? p.id.toString() : ('DYN-' + idx);
+                        const compareId = rawId.startsWith('PROP-') ? rawId : ('PROP-' + rawId);
+                        return compareId !== propId;
+                    });
                     localStorage.setItem('ownerProperties', JSON.stringify(filteredProps));
                 }
 

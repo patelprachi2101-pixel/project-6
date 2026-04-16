@@ -7,7 +7,7 @@ const baseHtml = `<!DOCTYPE html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{CITY_CAP}} Villas - Tenant Portal</title>
+    <title>{{CITY_CAP}} Villas - Property Finder</title>
     <link rel="stylesheet" href="../tenant-styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
@@ -22,7 +22,7 @@ const baseHtml = `<!DOCTYPE html>
                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                 <polyline points="9 22 9 12 15 12 15 22"></polyline>
             </svg>
-            <h2>TenantPortal</h2>
+            <a href="../index.html" style="text-decoration:none; color:inherit;"><h2>Property Finder</h2></a>
         </div>
         <div class="nav-links">
             <a href="../tenant-home.html" class="nav-link active">Home</a>
@@ -59,18 +59,7 @@ const baseHtml = `<!DOCTYPE html>
                     </select>
                 </div>
 
-                <div class="separator"></div>
 
-                <div class="filter-group">
-                    <label for="property-type">Property Type</label>
-                    <select id="property-type" class="filter-select">
-                        <option value="">Any Type</option>
-                        <option value="apartment">Apartment</option>
-                        <option value="house">House</option>
-                        <option value="pg">PG</option>
-                        <option value="villa" selected>Villa</option>
-                    </select>
-                </div>
 
                 <div class="separator"></div>
 
@@ -244,6 +233,7 @@ const baseHtml = `<!DOCTYPE html>
                 <div class="property-modal-details">
                     <h2 class="modal-title" id="modal-title">Property Title</h2>
                     <p class="modal-location" id="modal-loc">Property Location</p>
+                    <span id="modal-listing-type" style="display:inline-block; margin-top:0.5rem; padding:0.2rem 0.6rem; font-size:0.85rem; font-weight:600; border-radius:4px;">For Rent</span>
                     <div class="modal-amenities">
                         <span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg> 5 BHK</span>
                         <span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg> 5500 sqft</span>
@@ -411,48 +401,3 @@ cities.forEach(city => {
     fs.writeFileSync(path.join(dir, 'villa.html'), content);
     console.log(`Created ${city}/villa.html`);
 });
-
-// Update the script
-const scriptPath = path.join(__dirname, 'tenant-script.js');
-let scriptContent = fs.readFileSync(scriptPath, 'utf8');
-
-const searchBtnCode = `    // Handle search redirection
-    const searchBtn = document.querySelector('.btn-search');
-    if (searchBtn) {
-        searchBtn.addEventListener('click', () => {
-            const loc = document.getElementById('location')?.value;
-            const type = document.getElementById('property-type')?.value;
-
-            if (loc && (type === 'apartment' || type === 'pg' || type === 'villa')) {
-                const cities = ['ahmedabad', 'surat', 'jamnagar', 'mehsana', 'gandhinagar', 'rajkot', 'bhavnagar'];
-                if (cities.includes(loc)) {
-                    const currentPath = window.location.pathname;
-                    let targetFile = 'apartments.html';
-                    if (type === 'pg') targetFile = 'pg.html';
-                    if (type === 'villa') targetFile = 'villa.html';
-                    
-                    if (cities.some(c => currentPath.includes('/' + c + '/'))) {
-                         if (currentPath.includes('/' + loc + '/')) {
-                             window.location.href = targetFile;
-                         } else {
-                             window.location.href = '../' + loc + '/' + targetFile;
-                         }
-                    } else {
-                         window.location.href = loc + '/' + targetFile;
-                    }
-                } else {
-                    alert('Location missing. Select a valid city.');
-                }
-            } else {
-                alert('No properties found for this specific filter in this demo. Try Apartment, PG, or Villa.');
-            }
-        });
-    }
-
-});`;
-
-const scriptParts = scriptContent.split('// Handle search redirection');
-if (scriptParts.length > 1) {
-    fs.writeFileSync(scriptPath, scriptParts[0] + searchBtnCode);
-    console.log('Updated tenant-script.js for Villa support');
-}

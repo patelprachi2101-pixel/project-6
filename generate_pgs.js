@@ -7,7 +7,7 @@ const baseHtml = `<!DOCTYPE html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{CITY_CAP}} PGs - Tenant Portal</title>
+    <title>{{CITY_CAP}} PGs - Property Finder</title>
     <link rel="stylesheet" href="../tenant-styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
@@ -22,7 +22,7 @@ const baseHtml = `<!DOCTYPE html>
                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                 <polyline points="9 22 9 12 15 12 15 22"></polyline>
             </svg>
-            <h2>TenantPortal</h2>
+            <a href="../index.html" style="text-decoration:none; color:inherit;"><h2>Property Finder</h2></a>
         </div>
         <div class="nav-links">
             <a href="../tenant-home.html" class="nav-link active">Home</a>
@@ -59,18 +59,7 @@ const baseHtml = `<!DOCTYPE html>
                     </select>
                 </div>
 
-                <div class="separator"></div>
 
-                <div class="filter-group">
-                    <label for="property-type">Property Type</label>
-                    <select id="property-type" class="filter-select">
-                        <option value="">Any Type</option>
-                        <option value="apartment">Apartment</option>
-                        <option value="house">House</option>
-                        <option value="pg" selected>PG</option>
-                        <option value="villa">Villa</option>
-                    </select>
-                </div>
 
                 <div class="separator"></div>
 
@@ -208,6 +197,7 @@ const baseHtml = `<!DOCTYPE html>
                 <div class="property-modal-details">
                     <h2 class="modal-title" id="modal-title">Property Title</h2>
                     <p class="modal-location" id="modal-loc">Property Location</p>
+                    <span id="modal-listing-type" style="display:inline-block; margin-top:0.5rem; padding:0.2rem 0.6rem; font-size:0.85rem; font-weight:600; border-radius:4px;">For Rent</span>
                     <div class="modal-amenities">
                         <span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg> Sharing / Single</span>
                         <span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg> AC / Non-AC</span>

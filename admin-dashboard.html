@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - System Portal</title>
+    <title>Property Finder - Admin</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -379,7 +379,7 @@
                 <path d="M12 8v4"></path>
                 <path d="M12 16h.01"></path>
             </svg>
-            <h2>Admin<span style="color:var(--text-light)">Control</span></h2>
+            <h2>Property Finder</h2>
         </div>
 
         <nav class="nav-items">
@@ -857,6 +857,8 @@
                 <!-- Filled dynamically -->
             </div>
             <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: flex-end;">
+                <button id="property-approve-btn" class="btn-primary" style="background: var(--success-color);"
+                    onclick="approveProperty()">Approve Property</button>
                 <button class="action-btn danger" onclick="closePropertyModal()">Close</button>
             </div>
         </div>
